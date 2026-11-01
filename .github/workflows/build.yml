@@ -6,10 +6,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout
+      - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -18,8 +18,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Check Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME"
+          ls "$ANDROID_HOME"
 
       - name: Build Debug APK
         run: |
@@ -27,7 +30,9 @@ jobs:
           ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: JpScreenTranslator-ZFlip5
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
